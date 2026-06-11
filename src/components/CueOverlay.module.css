@@ -1,0 +1,13 @@
+.svg {
+  position: absolute;
+  inset: 0;
+  user-select: none;
+}
+
+.cueGroup {
+  cursor: ns-resize;
+}
+
+.hitZone {
+  cursor: ns-resize;
+}

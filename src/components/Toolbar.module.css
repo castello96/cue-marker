@@ -1,0 +1,41 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #1f2328;
+  color: #f0f6fc;
+  border-bottom: 1px solid #30363d;
+}
+
+.brand {
+  font-weight: 600;
+  margin-right: 12px;
+  letter-spacing: 0.02em;
+}
+
+.toolbar button {
+  background: #30363d;
+  color: #f0f6fc;
+  border: 1px solid #444c56;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toolbar button:hover:not(:disabled) {
+  background: #444c56;
+}
+
+.toolbar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filename {
+  margin-left: auto;
+  font-size: 12px;
+  color: #9da7b0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}

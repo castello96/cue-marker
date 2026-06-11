@@ -1,0 +1,68 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #1f2328;
+  border-bottom: 1px solid #30363d;
+  color: #f0f6fc;
+  font-size: 13px;
+}
+
+.bar button {
+  background: #30363d;
+  color: #f0f6fc;
+  border: 1px solid #444c56;
+  border-radius: 3px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.bar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bar input {
+  width: 56px;
+  background: #0d1117;
+  color: #f0f6fc;
+  border: 1px solid #30363d;
+  border-radius: 3px;
+  padding: 3px 6px;
+  text-align: center;
+}
+
+.total {
+  color: #9da7b0;
+}
+
+.spreadLabel {
+  color: #f0f6fc;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.viewToggle {
+  display: flex;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.viewToggle button {
+  border: 0;
+  border-radius: 0;
+  padding: 3px 12px;
+  background: #161b22;
+  color: #9da7b0;
+  cursor: pointer;
+}
+
+.viewToggle button.activeToggle {
+  background: #1f6feb;
+  color: #fff;
+}

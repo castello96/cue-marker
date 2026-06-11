@@ -1,0 +1,118 @@
+.panel {
+  padding: 12px;
+  border-bottom: 1px solid #30363d;
+}
+
+.heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9da7b0;
+  margin-bottom: 8px;
+}
+
+.placeholder {
+  font-size: 12px;
+  color: #6e7681;
+  line-height: 1.4;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.label {
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  color: #9da7b0;
+  margin-top: 4px;
+}
+
+.note {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #f0f6fc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+
+.note:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.textarea {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #f0f6fc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.sideToggle {
+  display: flex;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sideToggle button {
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+  padding: 5px;
+  background: #161b22;
+  color: #9da7b0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.sideToggle button.activeSide {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.delete {
+  margin-top: 6px;
+  background: #3a1015;
+  color: #ff8088;
+  border: 1px solid #5a1820;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.delete:hover {
+  background: #5a1820;
+  color: #fff;
+}

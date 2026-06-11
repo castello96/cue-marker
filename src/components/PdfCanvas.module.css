@@ -1,0 +1,53 @@
+.scroll {
+  flex: 1;
+  overflow: auto;
+  background: #161b22;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.spread {
+  display: flex;
+  align-items: flex-start;
+}
+
+.pageColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageWrap {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.canvas {
+  display: block;
+}
+
+.pageCaption {
+  font-size: 11px;
+  color: #9da7b0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.empty {
+  margin: auto;
+  text-align: center;
+  color: #9da7b0;
+}
+
+.title {
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #f0f6fc;
+}
+
+.sub {
+  font-size: 13px;
+}

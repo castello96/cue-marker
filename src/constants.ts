@@ -1,10 +1,12 @@
 import type { CueType } from './types';
 
 export const BUILT_IN_CUE_TYPES: CueType[] = [
-  { id: 'mic', name: 'Mic', color: '#1f6feb', builtIn: true, shortcut: 'm' },
-  { id: 'sound', name: 'Sound', color: '#8957e5', builtIn: true, shortcut: 's' },
-  { id: 'lights', name: 'Lights', color: '#bf8700', builtIn: true, shortcut: 'l' },
+  { id: 'mic', name: 'Mic', color: '#1f6feb', builtIn: true, shortcut: 'm', numbering: 'page', step: 10 },
+  { id: 'sound', name: 'Sound', color: '#8957e5', builtIn: true, shortcut: 's', numbering: 'page', step: 10 },
+  { id: 'lights', name: 'Lights', color: '#bf8700', builtIn: true, shortcut: 'l', numbering: 'page', step: 10 },
 ];
+
+export const DEFAULT_STEP = 10;
 
 export const BOX_W = 28;
 export const BOX_H = 14;

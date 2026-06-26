@@ -15,6 +15,7 @@ import {
   INSERT_LINE_H,
 } from '../constants';
 import { computeLanes, boxXForSide } from '../cues/layout';
+import { cueLabel } from '../cues/numbering';
 import { wrapText, canvasMeasure } from '../cues/wrap';
 import type { Cut, Insert } from '../types';
 import type { PageGeometry } from './PdfCanvas';
@@ -434,7 +435,7 @@ export function CueOverlay({ geom, page }: Props) {
               fill={type.color}
               pointerEvents="none"
             >
-              {cue.page}.{cue.number}
+              {cueLabel(cue, type)}
             </text>
             {cue.note && (
               <text

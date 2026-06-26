@@ -2,12 +2,16 @@ export type CueTypeId = string;
 export type CueId = string;
 export type CueSide = 'left' | 'right';
 
+export type NumberingMode = 'page' | 'global';
+
 export interface CueType {
   id: CueTypeId;
   name: string;
   color: string;
   builtIn: boolean;
   shortcut?: string;
+  numbering: NumberingMode; // 'page' = <page>.<n>, 'global' = sequential across show
+  step: number;             // gap between auto-assigned numbers (e.g. 10)
 }
 
 export interface Cue {
@@ -16,7 +20,8 @@ export interface Cue {
   page: number;
   y: number;
   note: string;
-  number: number;
+  number: number;        // auto-assigned, stable; sub-number (page mode) or absolute (global)
+  customLabel?: string;  // manual override of the displayed label
   side: CueSide;
 }
 

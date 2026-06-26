@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import type { Cue, CueSide, CueType, CueTypeId, Cut, Insert, Project, Selection, Tool } from './types';
-import { BUILT_IN_CUE_TYPES, CUSTOM_TYPE_COLORS } from './constants';
-import { renumber } from './cues/numbering';
+import { BUILT_IN_CUE_TYPES, CUSTOM_TYPE_COLORS, DEFAULT_STEP } from './constants';
+import { nextCueNumber, resequence } from './cues/numbering';
 
 interface State {
   pdfBytes: Uint8Array | null;
@@ -34,12 +34,14 @@ interface State {
   toggleShowCuts: () => void;
   toggleShowInserts: () => void;
   addCueType: (name: string, color?: string) => CueType;
-  updateCueType: (id: CueTypeId, patch: Partial<Pick<CueType, 'name' | 'color'>>) => void;
+  updateCueType: (id: CueTypeId, patch: Partial<Pick<CueType, 'name' | 'color' | 'numbering' | 'step'>>) => void;
   removeCueType: (id: CueTypeId) => void;
   addCue: (page: number, y: number) => Cue | null;
   updateCueY: (id: CueId, y: number) => void;
   updateCueNote: (id: CueId, note: string) => void;
   updateCueSide: (id: CueId, side: CueSide) => void;
+  updateCueLabel: (id: CueId, label: string) => void;
+  renumberPage: (page: number, typeId: CueTypeId) => void;
   deleteCue: (id: CueId) => void;
   addCut: (page: number, yStart: number, yEnd: number) => Cut;
   updateCutRange: (id: string, yStart: number, yEnd: number) => void;
@@ -146,6 +148,8 @@ export const useStore = create<State>((set, get) => ({
       name: name.trim() || 'Custom',
       color: color ?? pickCustomColor(get().cueTypes),
       builtIn: false,
+      numbering: 'page',
+      step: DEFAULT_STEP,
     };
     set(s => ({
       cueTypes: [...s.cueTypes, t],
@@ -163,7 +167,7 @@ export const useStore = create<State>((set, get) => ({
     const t = s.cueTypes.find(x => x.id === id);
     if (!t) return s;
     const removedCueIds = new Set(s.cues.filter(c => c.typeId === id).map(c => c.id));
-    const cues = renumber(s.cues.filter(c => c.typeId !== id).map(c => ({ ...c })));
+    const cues = s.cues.filter(c => c.typeId !== id);
     const visibility = { ...s.visibility };
     delete visibility[id];
     const cueTypes = s.cueTypes.filter(x => x.id !== id);
@@ -174,26 +178,27 @@ export const useStore = create<State>((set, get) => ({
   }),
 
   addCue: (page, y) => {
-    const { activeTypeId, cueTypes } = get();
-    if (!cueTypes.find(t => t.id === activeTypeId)) return null;
+    const { activeTypeId, cueTypes, cues } = get();
+    const type = cueTypes.find(t => t.id === activeTypeId);
+    if (!type) return null;
     const cue: Cue = {
       id: uuid(),
       typeId: activeTypeId,
       page,
       y,
       note: '',
-      number: 0,
+      number: nextCueNumber(cues, type, page),
       side: 'left',
     };
     set(s => ({
-      cues: renumber([...s.cues.map(c => ({ ...c })), cue]),
+      cues: [...s.cues, cue],
       selected: { kind: 'cue', id: cue.id },
     }));
     return cue;
   },
 
   updateCueY: (id, y) => set(s => ({
-    cues: renumber(s.cues.map(c => (c.id === id ? { ...c, y } : { ...c }))),
+    cues: s.cues.map(c => (c.id === id ? { ...c, y } : c)),
   })),
 
   updateCueNote: (id, note) => set(s => ({
@@ -204,8 +209,18 @@ export const useStore = create<State>((set, get) => ({
     cues: s.cues.map(c => (c.id === id ? { ...c, side } : c)),
   })),
 
+  updateCueLabel: (id, label) => set(s => ({
+    cues: s.cues.map(c => (c.id === id ? { ...c, customLabel: label.trim() || undefined } : c)),
+  })),
+
+  renumberPage: (page, typeId) => set(s => {
+    const type = s.cueTypes.find(t => t.id === typeId);
+    if (!type) return s;
+    return { cues: resequence(s.cues, type, page) };
+  }),
+
   deleteCue: (id) => set(s => ({
-    cues: renumber(s.cues.filter(c => c.id !== id).map(c => ({ ...c }))),
+    cues: s.cues.filter(c => c.id !== id),
     selected: s.selected?.kind === 'cue' && s.selected.id === id ? null : s.selected,
   })),
 
@@ -270,9 +285,7 @@ export const useStore = create<State>((set, get) => ({
     const id = s.selected.id;
     if (s.selected.kind === 'cue') {
       return {
-        cues: renumber(
-          s.cues.map(c => (c.id === id ? { ...c, y: Math.max(0, c.y + delta) } : { ...c })),
-        ),
+        cues: s.cues.map(c => (c.id === id ? { ...c, y: Math.max(0, c.y + delta) } : c)),
       };
     }
     if (s.selected.kind === 'insert') {
@@ -304,10 +317,12 @@ export const useStore = create<State>((set, get) => ({
     pdfFilename: project.pdfFilename,
     numPages,
     currentPage: 1,
-    cues: renumber(project.cues.map(c => ({ ...c, side: c.side ?? 'left' }))),
+    cues: project.cues.map(c => ({ ...c, side: c.side ?? 'left' })),
     cuts: (project.cuts ?? []).map(c => ({ ...c })),
     inserts: (project.inserts ?? []).map(i => ({ ...i, side: i.side ?? 'left' })),
-    cueTypes: project.cueTypes.length ? project.cueTypes : [...BUILT_IN_CUE_TYPES],
+    cueTypes: project.cueTypes.length
+      ? project.cueTypes.map(t => ({ ...t, numbering: t.numbering ?? 'page', step: t.step ?? DEFAULT_STEP }))
+      : [...BUILT_IN_CUE_TYPES],
     visibility: { ...initialVisibility(), ...project.visibility },
     showCuts: project.showCuts ?? true,
     showInserts: project.showInserts ?? true,

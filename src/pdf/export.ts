@@ -17,6 +17,7 @@ import {
   INSERT_LINE_H,
 } from '../constants';
 import { computeLanes, boxXForSide } from '../cues/layout';
+import { cueLabel } from '../cues/numbering';
 import { wrapText } from '../cues/wrap';
 
 function hexToRgb01(hex: string): { r: number; g: number; b: number } {
@@ -88,7 +89,7 @@ export async function exportAnnotatedPdf(
         color: rgb(1, 1, 1),
       });
 
-      const label = `${cue.page}.${cue.number}`;
+      const label = cueLabel(cue, type);
       page.drawText(label, {
         x: boxX + 3,
         y: y - 4,

@@ -1,4 +1,5 @@
 import { useStore } from '../store';
+import { cueLabel } from '../cues/numbering';
 import styles from './CueListPanel.module.css';
 
 export function CueListPanel() {
@@ -32,7 +33,7 @@ export function CueListPanel() {
               }}
             >
               <span className={styles.swatch} style={{ background: type.color }} />
-              <span className={styles.label}>{cue.page}.{cue.number}</span>
+              <span className={styles.label}>{cueLabel(cue, type)}</span>
               <span className={styles.type}>{type.name}</span>
               <span className={styles.note}>{cue.note || ''}</span>
             </li>

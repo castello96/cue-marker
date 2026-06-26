@@ -124,6 +124,47 @@
   cursor: pointer;
 }
 
+.subLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9da7b0;
+}
+
+.numbering {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.numbering button {
+  flex: 1;
+  background: #161b22;
+  color: #9da7b0;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.numbering button.numActive {
+  background: #1f6feb;
+  color: #fff;
+  border-color: #1f6feb;
+}
+
+.stepInput {
+  width: 48px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #f0f6fc;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
 .editorActions {
   display: flex;
   gap: 6px;

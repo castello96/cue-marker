@@ -78,6 +78,31 @@
   border-color: #58a6ff;
 }
 
+.numberRow {
+  display: flex;
+  gap: 6px;
+}
+
+.numberRow .note {
+  flex: 1;
+  min-width: 0;
+}
+
+.renumber {
+  background: #30363d;
+  color: #f0f6fc;
+  border: 1px solid #444c56;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.renumber:hover {
+  background: #444c56;
+}
+
 .sideToggle {
   display: flex;
   border: 1px solid #30363d;

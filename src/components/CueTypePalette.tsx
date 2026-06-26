@@ -53,6 +53,31 @@ export function CueTypePalette() {
                       />
                     ))}
                   </div>
+                  <label className={styles.subLabel}>Numbering</label>
+                  <div className={styles.numbering}>
+                    <button
+                      className={t.numbering === 'page' ? styles.numActive : ''}
+                      onClick={() => updateCueType(t.id, { numbering: 'page' })}
+                      title="Page-relative: <page>.<n>"
+                    >
+                      Page
+                    </button>
+                    <button
+                      className={t.numbering === 'global' ? styles.numActive : ''}
+                      onClick={() => updateCueType(t.id, { numbering: 'global' })}
+                      title="Sequential across the whole show"
+                    >
+                      Global
+                    </button>
+                    <input
+                      type="number"
+                      className={styles.stepInput}
+                      value={t.step}
+                      min={1}
+                      onChange={e => updateCueType(t.id, { step: Math.max(1, Number(e.target.value) || 1) })}
+                      title="Gap between auto-assigned numbers"
+                    />
+                  </div>
                   <div className={styles.editorActions}>
                     <button onClick={() => setEditingId(null)}>Done</button>
                     <button

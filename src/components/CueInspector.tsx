@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '../store';
 import { CUT_COLOR, INSERT_COLOR } from '../constants';
+import { cueLabel } from '../cues/numbering';
 import styles from './CueInspector.module.css';
 
 export function CueInspector() {
@@ -11,6 +12,8 @@ export function CueInspector() {
   const selected = useStore(s => s.selected);
   const updateCueNote = useStore(s => s.updateCueNote);
   const updateCueSide = useStore(s => s.updateCueSide);
+  const updateCueLabel = useStore(s => s.updateCueLabel);
+  const renumberPage = useStore(s => s.renumberPage);
   const deleteCue = useStore(s => s.deleteCue);
   const updateCutNote = useStore(s => s.updateCutNote);
   const deleteCut = useStore(s => s.deleteCut);
@@ -62,8 +65,27 @@ export function CueInspector() {
         <div className={styles.body}>
           <div className={styles.title}>
             <span className={styles.swatch} style={{ background: type?.color }} />
-            <span className={styles.label}>{type?.name} {cue.page}.{cue.number}</span>
+            <span className={styles.label}>{type?.name} {cueLabel(cue, type)}</span>
           </div>
+
+          <label className={styles.fieldLabel}>Number</label>
+          <div className={styles.numberRow}>
+            <input
+              className={styles.note}
+              value={cueLabel(cue, type)}
+              onChange={e => updateCueLabel(cue.id, e.target.value)}
+              onKeyDown={singleLineKeyDown}
+              title="Edit to override; clear to revert to auto-numbering"
+            />
+            <button
+              className={styles.renumber}
+              onClick={() => renumberPage(cue.page, cue.typeId)}
+              title="Re-sequence cleanly with gaps"
+            >
+              {type?.numbering === 'global' ? 'Renumber all' : 'Renumber page'}
+            </button>
+          </div>
+
           <label className={styles.fieldLabel}>Note</label>
           <input
             ref={fieldRef as React.RefObject<HTMLInputElement>}

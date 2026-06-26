@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import type { Cue, CueSide, CueType, CueTypeId, Cut, Insert, Project, Selection, Tool } from './types';
 import { BUILT_IN_CUE_TYPES, CUSTOM_TYPE_COLORS, DEFAULT_STEP } from './constants';
-import { nextCueNumber, resequence } from './cues/numbering';
+import { nextCueNumber, resequence, resequencePage } from './cues/numbering';
 
 interface State {
   pdfBytes: Uint8Array | null;
@@ -35,6 +35,7 @@ interface State {
   toggleShowInserts: () => void;
   addCueType: (name: string, color?: string) => CueType;
   updateCueType: (id: CueTypeId, patch: Partial<Pick<CueType, 'name' | 'color' | 'numbering' | 'step'>>) => void;
+  setCueTypeNumbering: (id: CueTypeId, mode: CueType['numbering']) => void;
   removeCueType: (id: CueTypeId) => void;
   addCue: (page: number, y: number) => Cue | null;
   updateCueY: (id: CueId, y: number) => void;
@@ -163,6 +164,18 @@ export const useStore = create<State>((set, get) => ({
     cueTypes: s.cueTypes.map(t => (t.id === id ? { ...t, ...patch } : t)),
   })),
 
+  // Switching mode also sets a sensible step (page=10, global=1) and re-sequences
+  // existing cues of the type so they don't carry over the other mode's numbers.
+  setCueTypeNumbering: (id, mode) => set(s => {
+    const type = s.cueTypes.find(t => t.id === id);
+    if (!type) return s;
+    const updated: CueType = { ...type, numbering: mode, step: mode === 'global' ? 1 : DEFAULT_STEP };
+    return {
+      cueTypes: s.cueTypes.map(t => (t.id === id ? updated : t)),
+      cues: resequence(s.cues, updated),
+    };
+  }),
+
   removeCueType: (id) => set(s => {
     if (s.cueTypes.length <= 1) return s; // keep at least one type
     const t = s.cueTypes.find(x => x.id === id);
@@ -221,7 +234,7 @@ export const useStore = create<State>((set, get) => ({
   renumberPage: (page, typeId) => set(s => {
     const type = s.cueTypes.find(t => t.id === typeId);
     if (!type) return s;
-    return { cues: resequence(s.cues, type, page) };
+    return { cues: resequencePage(s.cues, type, page) };
   }),
 
   deleteCue: (id) => set(s => ({

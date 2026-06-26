@@ -11,6 +11,7 @@ export function CueTypePalette() {
   const toggleVisibility = useStore(s => s.toggleVisibility);
   const removeCueType = useStore(s => s.removeCueType);
   const updateCueType = useStore(s => s.updateCueType);
+  const setCueTypeNumbering = useStore(s => s.setCueTypeNumbering);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   return (
@@ -57,14 +58,14 @@ export function CueTypePalette() {
                   <div className={styles.numbering}>
                     <button
                       className={t.numbering === 'page' ? styles.numActive : ''}
-                      onClick={() => updateCueType(t.id, { numbering: 'page' })}
+                      onClick={() => setCueTypeNumbering(t.id, 'page')}
                       title="Page-relative: <page>.<n>"
                     >
                       Page
                     </button>
                     <button
                       className={t.numbering === 'global' ? styles.numActive : ''}
-                      onClick={() => updateCueType(t.id, { numbering: 'global' })}
+                      onClick={() => setCueTypeNumbering(t.id, 'global')}
                       title="Sequential across the whole show"
                     >
                       Global

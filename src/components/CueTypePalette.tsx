@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useStore } from '../store';
+import { CUSTOM_TYPE_COLORS } from '../constants';
 import styles from './CueTypePalette.module.css';
 
 export function CueTypePalette() {
@@ -8,6 +10,8 @@ export function CueTypePalette() {
   const setActiveTypeId = useStore(s => s.setActiveTypeId);
   const toggleVisibility = useStore(s => s.toggleVisibility);
   const removeCueType = useStore(s => s.removeCueType);
+  const updateCueType = useStore(s => s.updateCueType);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   return (
     <div className={styles.palette}>
@@ -16,11 +20,57 @@ export function CueTypePalette() {
         {cueTypes.map(t => {
           const isActive = t.id === activeTypeId;
           const visible = visibility[t.id] !== false;
+          const editing = editingId === t.id;
+
+          if (editing) {
+            return (
+              <li key={t.id} className={`${styles.item} ${styles.editingItem}`}>
+                <div className={styles.editor}>
+                  <div className={styles.editorRow}>
+                    <input
+                      className={styles.nameInput}
+                      value={t.name}
+                      onChange={e => updateCueType(t.id, { name: e.target.value })}
+                      onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
+                      autoFocus
+                    />
+                    <input
+                      type="color"
+                      className={styles.colorInput}
+                      value={t.color}
+                      onChange={e => updateCueType(t.id, { color: e.target.value })}
+                      title="Custom color"
+                    />
+                  </div>
+                  <div className={styles.colors}>
+                    {CUSTOM_TYPE_COLORS.map(c => (
+                      <button
+                        key={c}
+                        className={styles.color}
+                        style={{ background: c, outline: c === t.color ? '2px solid #fff' : 'none' }}
+                        onClick={() => updateCueType(t.id, { color: c })}
+                        aria-label={`Color ${c}`}
+                      />
+                    ))}
+                  </div>
+                  <div className={styles.editorActions}>
+                    <button onClick={() => setEditingId(null)}>Done</button>
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => { removeCueType(t.id); setEditingId(null); }}
+                      disabled={cueTypes.length <= 1}
+                      title={cueTypes.length <= 1 ? 'Keep at least one type' : 'Delete type'}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          }
+
           return (
-            <li
-              key={t.id}
-              className={`${styles.item} ${isActive ? styles.active : ''}`}
-            >
+            <li key={t.id} className={`${styles.item} ${isActive ? styles.active : ''}`}>
               <button
                 className={styles.row}
                 onClick={() => setActiveTypeId(t.id)}
@@ -37,15 +87,14 @@ export function CueTypePalette() {
               >
                 {visible ? 'VIS' : 'HID'}
               </button>
-              {!t.builtIn && (
-                <button
-                  className={styles.delete}
-                  onClick={() => removeCueType(t.id)}
-                  title="Delete cue type"
-                >
-                  X
-                </button>
-              )}
+              <button
+                className={styles.edit}
+                onClick={() => setEditingId(t.id)}
+                title="Edit type"
+                aria-label="Edit type"
+              >
+                Edit
+              </button>
             </li>
           );
         })}

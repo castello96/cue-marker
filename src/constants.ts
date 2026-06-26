@@ -2,9 +2,8 @@ import type { CueType } from './types';
 
 export const BUILT_IN_CUE_TYPES: CueType[] = [
   { id: 'mic', name: 'Mic', color: '#1f6feb', builtIn: true, shortcut: 'm' },
-  { id: 'track', name: 'Track', color: '#8957e5', builtIn: true, shortcut: 't' },
-  { id: 'sfx', name: 'SFX', color: '#cf222e', builtIn: true, shortcut: 's' },
-  { id: 'light', name: 'Lighting', color: '#bf8700', builtIn: true, shortcut: 'l' },
+  { id: 'sound', name: 'Sound', color: '#8957e5', builtIn: true, shortcut: 's' },
+  { id: 'lights', name: 'Lights', color: '#bf8700', builtIn: true, shortcut: 'l' },
 ];
 
 export const BOX_W = 28;

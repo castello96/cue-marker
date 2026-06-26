@@ -34,6 +34,7 @@ interface State {
   toggleShowCuts: () => void;
   toggleShowInserts: () => void;
   addCueType: (name: string, color?: string) => CueType;
+  updateCueType: (id: CueTypeId, patch: Partial<Pick<CueType, 'name' | 'color'>>) => void;
   removeCueType: (id: CueTypeId) => void;
   addCue: (page: number, y: number) => Cue | null;
   updateCueY: (id: CueId, y: number) => void;
@@ -153,15 +154,23 @@ export const useStore = create<State>((set, get) => ({
     return t;
   },
 
+  updateCueType: (id, patch) => set(s => ({
+    cueTypes: s.cueTypes.map(t => (t.id === id ? { ...t, ...patch } : t)),
+  })),
+
   removeCueType: (id) => set(s => {
+    if (s.cueTypes.length <= 1) return s; // keep at least one type
     const t = s.cueTypes.find(x => x.id === id);
-    if (!t || t.builtIn) return s;
+    if (!t) return s;
+    const removedCueIds = new Set(s.cues.filter(c => c.typeId === id).map(c => c.id));
     const cues = renumber(s.cues.filter(c => c.typeId !== id).map(c => ({ ...c })));
     const visibility = { ...s.visibility };
     delete visibility[id];
     const cueTypes = s.cueTypes.filter(x => x.id !== id);
     const activeTypeId = s.activeTypeId === id ? cueTypes[0]?.id ?? '' : s.activeTypeId;
-    return { ...s, cues, visibility, cueTypes, activeTypeId };
+    const selected =
+      s.selected?.kind === 'cue' && removedCueIds.has(s.selected.id) ? null : s.selected;
+    return { ...s, cues, visibility, cueTypes, activeTypeId, selected };
   }),
 
   addCue: (page, y) => {

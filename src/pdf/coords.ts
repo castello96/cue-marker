@@ -9,3 +9,11 @@ export function pdfYToPixelY(pdfY: number, scale: number): number {
 export function pdfPointsWidthToPixels(pdfWidth: number, scale: number): number {
   return pdfWidth * scale;
 }
+
+export function pixelXToPdfX(pixelX: number, scale: number): number {
+  return pixelX / scale;
+}
+
+export function pdfXToPixelX(pdfX: number, scale: number): number {
+  return pdfX * scale;
+}

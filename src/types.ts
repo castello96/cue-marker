@@ -23,6 +23,7 @@ export interface Cue {
   number: number;        // auto-assigned, stable; sub-number (page mode) or absolute (global)
   customLabel?: string;  // manual override of the displayed label
   side: CueSide;
+  target?: { x: number; y: number }; // optional word target (PDF points); replaces the full-width line
 }
 
 export interface Cut {

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useStore } from '../store';
-import { pdfYToPixelY, pixelYToPdfY } from '../pdf/coords';
+import { pdfYToPixelY, pixelYToPdfY, pdfXToPixelX, pixelXToPdfX } from '../pdf/coords';
 import {
   BOX_W,
   BOX_H,
@@ -41,6 +41,7 @@ type Interaction =
     }
   | { type: 'cut-resize'; cutId: string; edge: 'top' | 'bottom'; pixelY: number }
   | { type: 'insert-drag'; insertId: string; pixelY: number }
+  | { type: 'cue-target-drag'; cueId: string; pixelX: number; pixelY: number }
   | null;
 
 const MIN_CUT_PX = 6;
@@ -60,6 +61,7 @@ export function CueOverlay({ geom, page }: Props) {
   const updateCutRange = useStore(s => s.updateCutRange);
   const addInsert = useStore(s => s.addInsert);
   const updateInsertY = useStore(s => s.updateInsertY);
+  const updateCueTarget = useStore(s => s.setCueTarget);
   const selectCue = useStore(s => s.selectCue);
   const selectCut = useStore(s => s.selectCut);
   const selectInsert = useStore(s => s.selectInsert);
@@ -84,6 +86,10 @@ export function CueOverlay({ geom, page }: Props) {
   const localY = (clientY: number) => {
     const rect = svgRef.current!.getBoundingClientRect();
     return Math.max(0, Math.min(geom.height, clientY - rect.top));
+  };
+  const localX = (clientX: number) => {
+    const rect = svgRef.current!.getBoundingClientRect();
+    return Math.max(0, Math.min(geom.width, clientX - rect.left));
   };
 
   // ---- background: start a cut (cut tool) ----
@@ -123,6 +129,13 @@ export function CueOverlay({ geom, page }: Props) {
     e.stopPropagation();
     selectCue(cueId);
     requestNoteFocus();
+  };
+  const onCueTargetPointerDown = (e: React.PointerEvent, cueId: string) => {
+    e.stopPropagation();
+    suppressClickRef.current = true;
+    selectCue(cueId);
+    svgRef.current!.setPointerCapture(e.pointerId);
+    setInteraction({ type: 'cue-target-drag', cueId, pixelX: localX(e.clientX), pixelY: localY(e.clientY) });
   };
 
   // ---- cut interactions ----
@@ -174,7 +187,11 @@ export function CueOverlay({ geom, page }: Props) {
   // ---- shared move / up ----
   const onPointerMove = (e: React.PointerEvent) => {
     if (!interaction) return;
-    setInteraction({ ...interaction, pixelY: localY(e.clientY) });
+    if (interaction.type === 'cue-target-drag') {
+      setInteraction({ ...interaction, pixelX: localX(e.clientX), pixelY: localY(e.clientY) });
+    } else {
+      setInteraction({ ...interaction, pixelY: localY(e.clientY) });
+    }
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
@@ -183,6 +200,11 @@ export function CueOverlay({ geom, page }: Props) {
     const y = localY(e.clientY);
     if (interaction.type === 'cue-drag') {
       updateCueY(interaction.cueId, pixelYToPdfY(y, geom.scale));
+    } else if (interaction.type === 'cue-target-drag') {
+      updateCueTarget(interaction.cueId, {
+        x: pixelXToPdfX(localX(e.clientX), geom.scale),
+        y: pixelYToPdfY(y, geom.scale),
+      });
     } else if (interaction.type === 'insert-drag') {
       updateInsertY(interaction.insertId, pixelYToPdfY(y, geom.scale));
     } else if (interaction.type === 'cut-new') {
@@ -392,6 +414,15 @@ export function CueOverlay({ geom, page }: Props) {
         const isSelected = selected?.kind === 'cue' && selected.id === cue.id;
         const side = cue.side ?? 'left';
         const boxX = boxXForSide(side, lanes.get(cue.id) ?? 0, geom.width);
+        const targeted = !!cue.target;
+        const draggingTarget = interaction?.type === 'cue-target-drag' && interaction.cueId === cue.id;
+        const ringX = targeted
+          ? (draggingTarget ? interaction.pixelX : pdfXToPixelX(cue.target!.x, geom.scale))
+          : 0;
+        const ringRelY = targeted
+          ? (draggingTarget ? interaction.pixelY : pdfYToPixelY(cue.target!.y, geom.scale)) - py
+          : 0;
+        const leaderStartX = side === 'right' ? boxX : boxX + BOX_W;
 
         return (
           <g
@@ -403,20 +434,48 @@ export function CueOverlay({ geom, page }: Props) {
             data-cue-id={cue.id}
           >
             {isSelected && (
-              <>
-                <line x1={0} x2={geom.width} y1={0} y2={0} stroke={type.color} strokeWidth={6} opacity={0.3} />
-                <rect x={boxX - 3} y={-BOX_H / 2 - 3} width={BOX_W + 6} height={BOX_H + 6} rx={3} fill={type.color} opacity={0.3} />
-              </>
+              <rect x={boxX - 3} y={-BOX_H / 2 - 3} width={BOX_W + 6} height={BOX_H + 6} rx={3} fill={type.color} opacity={0.3} />
             )}
-            <line
-              x1={0}
-              x2={geom.width}
-              y1={0}
-              y2={0}
-              stroke={type.color}
-              strokeWidth={isSelected ? 2 : 1}
-              opacity={isDragged ? 0.6 : 1}
-            />
+            {isSelected && !targeted && (
+              <line x1={0} x2={geom.width} y1={0} y2={0} stroke={type.color} strokeWidth={6} opacity={0.3} />
+            )}
+
+            {targeted ? (
+              <>
+                <line
+                  x1={leaderStartX}
+                  y1={0}
+                  x2={ringX}
+                  y2={ringRelY}
+                  stroke={type.color}
+                  strokeWidth={isSelected ? 1.5 : 1}
+                  opacity={isDragged ? 0.6 : 1}
+                />
+                <ellipse
+                  cx={ringX}
+                  cy={ringRelY}
+                  rx={24}
+                  ry={9}
+                  fill="transparent"
+                  stroke={type.color}
+                  strokeWidth={isSelected ? 2 : 1.5}
+                  style={{ cursor: 'move' }}
+                  pointerEvents="all"
+                  onPointerDown={e => onCueTargetPointerDown(e, cue.id)}
+                />
+              </>
+            ) : (
+              <line
+                x1={0}
+                x2={geom.width}
+                y1={0}
+                y2={0}
+                stroke={type.color}
+                strokeWidth={isSelected ? 2 : 1}
+                opacity={isDragged ? 0.6 : 1}
+              />
+            )}
+
             <rect
               x={boxX}
               y={-BOX_H / 2}
@@ -449,14 +508,16 @@ export function CueOverlay({ geom, page }: Props) {
                 {cue.note}
               </text>
             )}
-            <rect
-              className={styles.hitZone}
-              x={0}
-              y={-8}
-              width={geom.width}
-              height={16}
-              fill="transparent"
-            />
+            {!targeted && (
+              <rect
+                className={styles.hitZone}
+                x={0}
+                y={-8}
+                width={geom.width}
+                height={16}
+                fill="transparent"
+              />
+            )}
           </g>
         );
       })}

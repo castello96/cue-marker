@@ -14,6 +14,7 @@ export function CueInspector() {
   const updateCueSide = useStore(s => s.updateCueSide);
   const updateCueLabel = useStore(s => s.updateCueLabel);
   const renumberPage = useStore(s => s.renumberPage);
+  const setCueTarget = useStore(s => s.setCueTarget);
   const deleteCue = useStore(s => s.deleteCue);
   const updateCutNote = useStore(s => s.updateCutNote);
   const deleteCut = useStore(s => s.deleteCut);
@@ -96,6 +97,24 @@ export function CueInspector() {
             onKeyDown={singleLineKeyDown}
           />
           <SideToggle side={cue.side ?? 'left'} onSet={s => updateCueSide(cue.id, s)} />
+
+          <label className={styles.fieldLabel}>Word target</label>
+          {cue.target ? (
+            <button
+              className={styles.targetBtn}
+              onClick={() => setCueTarget(cue.id, null)}
+            >
+              Remove target (drag the ring to a word)
+            </button>
+          ) : (
+            <button
+              className={styles.targetBtn}
+              onClick={() => setCueTarget(cue.id, { x: 160, y: cue.y })}
+            >
+              Target a word
+            </button>
+          )}
+
           <button className={styles.delete} onClick={() => deleteCue(cue.id)}>Delete cue</button>
         </div>
       )}

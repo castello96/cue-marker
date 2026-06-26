@@ -103,6 +103,20 @@
   background: #444c56;
 }
 
+.targetBtn {
+  background: #30363d;
+  color: #f0f6fc;
+  border: 1px solid #444c56;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.targetBtn:hover {
+  background: #444c56;
+}
+
 .sideToggle {
   display: flex;
   border: 1px solid #30363d;

@@ -72,12 +72,20 @@ export async function exportAnnotatedPdf(
       const side = cue.side ?? 'left';
       const boxX = boxXForSide(side, lanes.get(cue.id) ?? 0, width);
 
-      page.drawLine({
-        start: { x: 0, y },
-        end: { x: width, y },
-        thickness: LINE_THICKNESS,
-        color,
-      });
+      if (cue.target) {
+        const tx = cue.target.x;
+        const ty = height - cue.target.y;
+        const leaderStartX = side === 'right' ? boxX : boxX + BOX_W;
+        page.drawLine({ start: { x: leaderStartX, y }, end: { x: tx, y: ty }, thickness: LINE_THICKNESS, color });
+        page.drawEllipse({ x: tx, y: ty, xScale: 24, yScale: 9, borderColor: color, borderWidth: 1.2 });
+      } else {
+        page.drawLine({
+          start: { x: 0, y },
+          end: { x: width, y },
+          thickness: LINE_THICKNESS,
+          color,
+        });
+      }
 
       page.drawRectangle({
         x: boxX,

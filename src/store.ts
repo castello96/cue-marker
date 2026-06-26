@@ -41,6 +41,7 @@ interface State {
   updateCueNote: (id: CueId, note: string) => void;
   updateCueSide: (id: CueId, side: CueSide) => void;
   updateCueLabel: (id: CueId, label: string) => void;
+  setCueTarget: (id: CueId, target: { x: number; y: number } | null) => void;
   renumberPage: (page: number, typeId: CueTypeId) => void;
   deleteCue: (id: CueId) => void;
   addCut: (page: number, yStart: number, yEnd: number) => Cut;
@@ -211,6 +212,10 @@ export const useStore = create<State>((set, get) => ({
 
   updateCueLabel: (id, label) => set(s => ({
     cues: s.cues.map(c => (c.id === id ? { ...c, customLabel: label.trim() || undefined } : c)),
+  })),
+
+  setCueTarget: (id, target) => set(s => ({
+    cues: s.cues.map(c => (c.id === id ? { ...c, target: target ?? undefined } : c)),
   })),
 
   renumberPage: (page, typeId) => set(s => {
